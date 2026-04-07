@@ -139,7 +139,7 @@ const solarChart = new Chart(
 );
 
 function updateData() {
-  moisture += (Math.random() * 10 - 5);
+  moisture -= Math.random() * 3;
   solar += (Math.random() * 50 - 25);
   water -= Math.random() * 2;
 
