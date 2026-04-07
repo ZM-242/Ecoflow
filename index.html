@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EcoFlow Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+}
+
+header {
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+  background: #020617;
+  border-bottom: 2px solid #22c55e;
+}
+
+.container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background: #020617;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 10px #000;
+  text-align: center;
+}
+
+.value {
+  font-size: 32px;
+  margin-top: 10px;
+  color: #22c55e;
+}
+
+.status {
+  font-size: 20px;
+  margin-top: 10px;
+}
+
+.chart-container {
+  grid-column: span 2;
+  background: #020617;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+canvas {
+  max-height: 300px;
+}
+</style>
+</head>
+
+<body>
+
+<header>🌱 EcoFlow Smart Irrigation Dashboard</header>
+
+<div class="container">
+
+  <div class="card">
+    <h3>Soil Moisture</h3>
+    <div id="moisture" class="value">--%</div>
+  </div>
+
+  <div class="card">
+    <h3>Solar Output</h3>
+    <div id="solar" class="value">-- W</div>
+  </div>
+
+  <div class="card">
+    <h3>Water Tank</h3>
+    <div id="water" class="value">--%</div>
+  </div>
+
+  <div class="card">
+    <h3>Pump Status</h3>
+    <div id="pump" class="status">--</div>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="moistureChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="solarChart"></canvas>
+  </div>
+
+</div>
+
+<script>
+let moistureEl = document.getElementById("moisture");
+let solarEl = document.getElementById("solar");
+let waterEl = document.getElementById("water");
+let pumpEl = document.getElementById("pump");
+
+let moisture = 60;
+let solar = 300;
+let water = 80;
+
+const moistureData = {
+  labels: [],
+  datasets: [{
+    label: "Soil Moisture (%)",
+    data: [],
+    borderColor: "#22c55e",
+    fill: false
+  }]
+};
+
+const solarData = {
+  labels: [],
+  datasets: [{
+    label: "Solar Output (W)",
+    data: [],
+    borderColor: "#facc15",
+    fill: false
+  }]
+};
+
+const moistureChart = new Chart(
+  document.getElementById("moistureChart"),
+  { type: "line", data: moistureData }
+);
+
+const solarChart = new Chart(
+  document.getElementById("solarChart"),
+  { type: "line", data: solarData }
+);
+
+function updateData() {
+  moisture += (Math.random() * 10 - 5);
+  solar += (Math.random() * 50 - 25);
+  water -= Math.random() * 2;
+
+  moisture = Math.max(20, Math.min(100, moisture));
+  solar = Math.max(0, Math.min(600, solar));
+  water = Math.max(0, water);
+
+  let pumpOn = moisture < 40 && water > 10;
+
+  if (pumpOn) {
+    moisture += 2;
+    water -= 1;
+  }
+
+  moistureEl.textContent = moisture.toFixed(1) + "%";
+  solarEl.textContent = solar.toFixed(0) + " W";
+  waterEl.textContent = water.toFixed(1) + "%";
+  pumpEl.textContent = pumpOn ? "ON" : "OFF";
+  pumpEl.style.color = pumpOn ? "#22c55e" : "#ef4444";
+
+  let time = new Date().toLocaleTimeString();
+
+  moistureData.labels.push(time);
+  moistureData.datasets[0].data.push(moisture);
+
+  solarData.labels.push(time);
+  solarData.datasets[0].data.push(solar);
+
+  if (moistureData.labels.length > 10) {
+    moistureData.labels.shift();
+    moistureData.datasets[0].data.shift();
+
+    solarData.labels.shift();
+    solarData.datasets[0].data.shift();
+  }
+
+  moistureChart.update();
+  solarChart.update();
+}
+
+setInterval(updateData, 2000);
+</script>
+
+</body>
+</html>
